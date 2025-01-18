@@ -69,7 +69,7 @@
 /**
  * @brief The maximum number of items in the task queue.
  */
-#define WALTER_MODEM_TASK_QUEUE_MAX_ITEMS 32
+#define WALTER_MODEM_TASK_QUEUE_MAX_ITEMS 16
 
 /**
  * @brief The size in bytes of the task queue.
@@ -80,12 +80,13 @@
 /**
  * @brief The maximum number of pending commands.
  */
-#define WALTER_MODEM_MAX_PENDING_COMMANDS 32
+#define WALTER_MODEM_MAX_PENDING_COMMANDS 8
 
 /**
  * @brief The size of an AT response buffer.
  */
-#define WALTER_MODEM_RSP_BUF_SIZE (1536 * 2)
+// #define WALTER_MODEM_RSP_BUF_SIZE (1536 * 4)
+#define WALTER_MODEM_RSP_BUF_SIZE (4096 * 5)
 
 /**
  * @brief The number of buffers in the buffer pool.
@@ -1566,7 +1567,7 @@ typedef struct {
   /**
    * @brief Pointer to the data in the buffer.
    */
-  uint8_t data[WALTER_MODEM_RSP_BUF_SIZE] = {0};
+  EXT_RAM_BSS_ATTR uint8_t data[WALTER_MODEM_RSP_BUF_SIZE] = {0};
 
   /**
    * @brief The number of actual data bytes in the buffer.
@@ -3107,6 +3108,7 @@ public:
   static bool getIdentity(WalterModemRsp *rsp = NULL, walterModemCb cb = NULL,
                           void *args = NULL);
 
+  static bool getDeviceInfo(WalterModemRsp *rsp, walterModemCb cb, void *args);
   /**
    * @brief Disconnect mqtt connection.
    *
@@ -3472,8 +3474,8 @@ public:
    * BlueCherrySynchronize call.
    *
    * The arduino developer will now need to poll for the ACKnowledgement
-   * and the incoming messages using blueCherryDidRing, before more messages can
-   * be published.
+   * and the incoming messages using blueCherryDidRing, before more messages
+   * can be published.
    *
    * Even if nothing was enqueued for publish, this call must frequently
    * be executed if Walter is subscribed to one or more MQTT topics.
@@ -3483,8 +3485,9 @@ public:
    *
    * @return True if we have sent the message and are awaiting response,
    * false in the following cases:
-   * - if we are still awaiting a response from a previous blueCherrySynchronize
-   *   call (which the arduino program should know already)
+   * - if we are still awaiting a response from a previous
+   * blueCherrySynchronize call (which the arduino program should know
+   * already)
    * - if we could not connect to the COAP to MQTT bridge server
    * - if setting the COAP header or sending the COAP data failed
    */
@@ -3910,11 +3913,11 @@ public:
    *
    * @param mode Enable or disable the use of PSM.
    * @param reqTau The requested extended periodic TAU value (T3412).
-   * This is coded as one byte (octet 3) of the GPRS Timer 3 information element
-   * coded as bit format (e.g. "00100001" equals 1 hour).
+   * This is coded as one byte (octet 3) of the GPRS Timer 3 information
+   * element coded as bit format (e.g. "00100001" equals 1 hour).
    * @param reqActive The requested Active Time value (T3324).
-   * This is coded as one byte (octet 3) of the GPRS Timer 2 information element
-   * coded as bit format (e.g. "00000101" equals 10 seconds).
+   * This is coded as one byte (octet 3) of the GPRS Timer 2 information
+   * element coded as bit format (e.g. "00000101" equals 10 seconds).
    * @param rsp Pointer to a modem response structure to save the result
    * of the command in. When NULL is given the result is ignored.
    * @param cb Optional callback argument, when not NULL this function

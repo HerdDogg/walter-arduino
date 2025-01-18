@@ -2254,6 +2254,9 @@ void WalterModem::_processQueueRsp(WalterModemCmd *cmd,
         _httpContextSet[_httpCurrentProfile].httpStatus;
     if (_httpContextSet[_httpCurrentProfile].contentLength >
         cmd->dataSize - 1) {
+      ESP_LOGW(__func__, "***** Reducing contentLength from %d to %d",
+               (int)_httpContextSet[_httpCurrentProfile].contentLength,
+               (int)cmd->dataSize - 1);
       cmd->rsp->data.httpResponse.contentLength = cmd->dataSize - 1;
     } else {
       cmd->rsp->data.httpResponse.contentLength =
@@ -3708,6 +3711,11 @@ bool WalterModem::getCellInformation(WalterModemSQNMONIReportsType type,
   _returnAfterReply();
 }
 
+bool WalterModem::getDeviceInfo(WalterModemRsp *rsp, walterModemCb cb,
+                                void *args) {
+  _runCmd(arr("AT+CGMM,", "AT+CGMI"), "OK", rsp, cb, args);
+  _returnAfterReply();
+}
 bool WalterModem::getIdentity(WalterModemRsp *rsp, walterModemCb cb,
                               void *args) {
   _runCmd(arr("AT+CGSN=2"), "OK", rsp, cb, args);
